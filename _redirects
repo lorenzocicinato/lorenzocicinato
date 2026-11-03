@@ -1,0 +1,5 @@
+# Netlify: tutti gli URL del sito mostrano index.html, poi script.js sceglie la vista.
+# Senza questo, aprire direttamente /work o /about (o ricaricare la pagina) darebbe 404.
+/work/   /work   301
+/about/  /about  301
+/*       /index.html   200

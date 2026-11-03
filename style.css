@@ -1,0 +1,329 @@
+/* ==========================================================================
+   Lorenzo Cicinato — portfolio (pagina unica, tre viste: home / work / about)
+   Tutti i valori del design stanno qui, nelle variabili :root.
+   Se cambi qualcosa in Figma (colonne, margini, font, colori, tempi),
+   cambia solo qui.
+   ========================================================================== */
+
+:root {
+  /* Griglia (desktop, da Figma: 16 colonne, margini e gap 20px) */
+  --cols: 16;
+  --margin: 20px;
+  --gap: 20px;
+
+  /* Tipografia */
+  --font: "neue-haas-grotesk-display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --weight: 500;            /* Neue Haas Grotesk Display Medium */
+  --fs: 16px;               /* testo principale */
+  --lh: 16px;               /* interlinea principale */
+  --fs-small: 10px;         /* nav e footer: misurato dallo screenshot, ~10px */
+  --lh-small: 10px;
+  --tracking: 0;            /* TODO: controlla il letter-spacing in Figma (es. -0.01em) */
+
+  /* Colori */
+  --black: #000;
+  --grey: #7a7a7a;
+  --white: #fff;
+
+  /* Transizione tra le viste: prima esce il testo vecchio (metà del tempo),
+     poi entra quello nuovo (l'altra metà). Cambia solo --page-transition. */
+  --page-transition: 0.6s;
+  --half: calc(var(--page-transition) / 2);
+
+  /* Intro della Home (solo all'apertura o al ricaricamento della pagina) */
+  --intro-start: 0.6s;       /* attesa prima che parta tutto */
+  --intro-duration: 0.8s;    /* durata del fade di ogni elemento */
+  --intro-step: 0.6s;        /* quando parte la scritta a destra, dopo il nome */
+  --intro-ui-delay: 1.2s;    /* quando compaiono nav e footer (insieme) */
+}
+
+/* Reset minimo */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100svh;
+  /* Due righe: contenuto (che si allunga) + footer (che resta in fondo) */
+  display: grid;
+  grid-template-rows: 1fr auto;
+  font-family: var(--font);
+  font-weight: var(--weight);
+  font-size: var(--fs);
+  line-height: var(--lh);
+  letter-spacing: var(--tracking);
+  color: var(--black);
+  background: var(--white);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* --------------------------------------------------------------------------
+   Griglia: 16 colonne uguali, gap 20, margini laterali 20.
+   Qualsiasi elemento con .grid diventa una riga della griglia;
+   i figli si posizionano con grid-column.
+   -------------------------------------------------------------------------- */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  column-gap: var(--gap);
+  padding-inline: var(--margin);
+}
+
+/* --------------------------------------------------------------------------
+   Nav: fissa in alto, centrata. Grigia di default, nera sulla vista attiva
+   (aria-current lo imposta script.js) e in hover.
+   -------------------------------------------------------------------------- */
+.nav {
+  position: fixed;
+  inset: 0 0 auto 0;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  padding-top: var(--margin);
+  font-size: var(--fs-small);
+  line-height: var(--fs-small);
+}
+
+.nav a {
+  color: var(--grey);
+  transition: color var(--half) ease;   /* il cambio di vista attiva sfuma */
+}
+
+.nav a:hover,
+.nav a[aria-current="page"] {
+  color: var(--black);
+}
+
+.nav a:hover {
+  transition: none;                     /* in hover il nero arriva subito */
+}
+
+/* --------------------------------------------------------------------------
+   Contenuto: la PRIMA riga di testo è centrata verticalmente nel viewport
+   (50svh), le righe successive scendono da lì. Il nome resta quindi sempre
+   alla stessa altezza in tutte e tre le viste.
+   -------------------------------------------------------------------------- */
+main {
+  padding-top: calc(50svh - var(--lh) / 2);
+}
+
+.col-left {
+  grid-column: 3 / span 6;      /* parte dalla colonna 3 */
+}
+
+.col-right {
+  grid-column: 11 / span 4;     /* finisce alla colonna 14 */
+  text-align: right;
+}
+
+/* Tutti i link nel testo (nome, email, social): grigio in hover */
+.col-left a:hover {
+  color: var(--grey);
+}
+
+/* --------------------------------------------------------------------------
+   Viste: come compaiono e scompaiono i testi.
+
+   Ogni elemento che cambia tra le viste ha  data-views="home work"  (l'elenco
+   delle viste in cui è visibile). Il resto lo fa questo CSS: script.js si
+   limita a scrivere la vista attiva in  <html data-view="...">.
+
+   - elemento che esce:  opacity -> 0 nella prima metà del tempo
+   - elemento che entra: aspetta la prima metà, poi opacity -> 1
+   - elemento presente in entrambe le viste (es. "a Work in Progress" tra
+     home e work): lo stile non cambia, quindi resta fermo.
+
+   visibility: hidden serve a togliere dal tab, dai click e dagli screen
+   reader il testo non visibile; scatta alla fine del fade di uscita.
+   -------------------------------------------------------------------------- */
+[data-views] {
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity var(--half) ease,
+    visibility 0s linear var(--half);
+}
+
+html[data-view="home"]  [data-views~="home"],
+html[data-view="work"]  [data-views~="work"],
+html[data-view="about"] [data-views~="about"] {
+  opacity: 1;
+  visibility: visible;
+  transition:
+    opacity var(--half) ease var(--half),
+    visibility 0s;
+}
+
+/* Testi di viste diverse, nella stessa posizione: si sovrappongono nella
+   stessa cella di una griglia (grid-area 1 / 1) e se ne vede uno alla volta. */
+.stack {
+  display: grid;
+}
+
+.stack > * {
+  grid-area: 1 / 1;
+}
+
+.stack p + p {
+  margin-top: var(--lh);        /* il vuoto tra i blocchi di About è una riga */
+}
+
+/* "Constantly" / "Still": stessa cella, allineate a destra, così la parola
+   che si vede resta attaccata a "a Work in Progress" (che non si muove). */
+.swap {
+  display: inline-grid;
+}
+
+.swap > span {
+  grid-area: 1 / 1;
+  text-align: right;
+}
+
+/* Versione mobile della scritta a destra: su desktop non si vede
+   (si accende nella media query in fondo al file) */
+.tagline-mobile {
+  display: none;
+}
+
+/* --------------------------------------------------------------------------
+   Footer
+   -------------------------------------------------------------------------- */
+.footer {
+  padding-bottom: var(--margin);
+  text-align: center;
+  font-size: var(--fs-small);
+  line-height: var(--lh-small);
+  color: var(--grey);
+}
+
+/* --------------------------------------------------------------------------
+   Intro della Home.
+   script.js mette la classe "intro" su <html> SOLO se la pagina viene aperta
+   (o ricaricata) sulla Home; la toglie a fine animazione. Chi arriva in Home
+   da Work o About non la vede: lì la classe non c'è.
+
+   Sequenza:  nome  ->  scritta a destra  ->  (pausa)  ->  nav + footer.
+   Ogni elemento fa lo stesso fade in (da opacity 0 al suo valore normale);
+   cambiano solo i ritardi, che sono le variabili in :root.
+   -------------------------------------------------------------------------- */
+@keyframes intro-in {
+  from { opacity: 0; }
+}
+
+html.intro .col-left > p:first-child,
+html.intro .col-right,
+html.intro .nav,
+html.intro .footer {
+  animation: intro-in var(--intro-duration) ease both;
+  animation-delay: var(--intro-start);
+}
+
+html.intro .col-right {
+  animation-delay: calc(var(--intro-start) + var(--intro-step));
+}
+
+html.intro .nav,
+html.intro .footer {
+  animation-delay: calc(var(--intro-start) + var(--intro-ui-delay));
+}
+
+/* Testo solo per screen reader: presente, ma invisibile */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Chi ha "riduci movimento" attivo nel sistema non vede animazioni */
+@media (prefers-reduced-motion: reduce) {
+  [data-views],
+  .nav a {
+    transition: none !important;
+  }
+
+  html.intro .col-left > p:first-child,
+  html.intro .col-right,
+  html.intro .nav,
+  html.intro .footer {
+    animation: none !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Sotto i 1024px: 6 colonne, stessi margini del desktop.
+   Cambia solo la POSIZIONE degli elementi; font, spazi e animazioni sono gli
+   stessi. Tutto è allineato a sinistra e si legge dall'alto in basso:
+
+     riga 1   Lorenzo Cicinato
+     riga 2   Constantly / Still a Work in Progress     (Home e Work)
+              Graphic Designer and Art Director          (About)
+     riga 4   Portfolio on request here                  (Work)
+
+   Le righe sono fisse: ogni testo sta sempre alla stessa altezza, da
+   qualunque vista arrivi, quindi durante i fade non si sposta niente.
+   -------------------------------------------------------------------------- */
+@media (max-width: 1023px) {
+  :root {
+    --cols: 6;
+  }
+
+  /* .col-left "sparisce" come contenitore: il nome e i blocchi diventano
+     elementi diretti della griglia di <main> e si possono ordinare a piacere. */
+  .col-left {
+    display: contents;
+  }
+
+  /* Le righe restano della loro altezza e partono dall'alto: senza questo il
+     browser si divide lo spazio libero della pagina tra le righe e le allontana. */
+  main {
+    align-content: start;
+  }
+
+  .col-left > p:first-child {        /* il nome */
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+
+  /* Scritta e blocchi Work/About stanno tutti nella riga 2, uno sopra l'altro
+     (se ne vede uno alla volta, come nello .stack). */
+  .col-right,
+  .stack {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .col-right {
+    align-self: start;               /* alta una riga: non copre i link del blocco sotto */
+    text-align: left;
+  }
+
+  /* Work: una riga vuota dopo la scritta, poi "Portfolio on request" (riga 4) */
+  .stack > [data-views="work"] {
+    margin-top: calc(var(--lh) * 2);
+  }
+
+  /* Della scritta si vede la versione mobile (riga intera), non quella desktop */
+  .tagline-desktop {
+    display: none;
+  }
+
+  .tagline-mobile {
+    display: grid;                   /* le due righe si sovrappongono nella stessa cella */
+  }
+
+  .tagline-mobile > span {
+    grid-area: 1 / 1;
+  }
+}
