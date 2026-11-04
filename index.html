@@ -1,19 +1,13 @@
 <!DOCTYPE html>
-<!-- data-view è la vista attiva (home / work / about): lo cambia script.js,
-     e il CSS decide cosa mostrare. Qui il valore di partenza. -->
 <html lang="en" data-view="home">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Lorenzo Cicinato</title>
 
-  <!-- Adobe Fonts: crea un Web Project su fonts.adobe.com, aggiungi
-       Neue Haas Grotesk Display (peso Medium) e sostituisci XXXXXXX con il tuo Kit ID -->
   <link rel="stylesheet" href="https://use.typekit.net/ytl7uoo.css">
   <link rel="stylesheet" href="style.css">
 
-  <!-- Nell'head (senza defer) di proposito: imposta la vista giusta PRIMA
-       del primo disegno della pagina, così al caricamento non parte nessun fade. -->
   <script src="script.js"></script>
 </head>
 <body>
@@ -23,16 +17,13 @@
     <a href="/about" data-link="about">About</a>
   </nav>
 
-  <!-- Annuncio per gli screen reader al cambio di vista (vedi script.js) -->
   <p id="announce" class="sr-only" aria-live="polite"></p>
 
   <main class="grid">
 
     <div class="col-left">
-      <!-- Il nome c'è sempre e fa da ancora: torna alla Home -->
       <p><a href="/" data-link="home">Lorenzo Cicinato</a></p>
 
-      <!-- Sotto il nome, un blocco per vista (si sovrappongono: vedi .stack) -->
       <div class="stack">
         <p data-views="work">Portfolio on request <a href="mailto:info@lorenzocicinato.com">here</a></p>
 
@@ -43,7 +34,6 @@
           </p>
           <p>
             <a href="mailto:info@lorenzocicinato.com">info@lorenzocicinato.com</a><br>
-            <!-- TODO: conferma che sia Instagram -->
             <a href="https://instagram.com/lorenzocicinato">@lorenzocicinato</a>
           </p>
         </div>
@@ -51,8 +41,6 @@
     </div>
 
     <p class="col-right">
-      <!-- Desktop: una parola o l'altra, nello stesso punto;
-           "a Work in Progress" resta ferma tra home e work, sparisce in about -->
       <span class="tagline-desktop">
         <span class="swap">
           <span data-views="home">Constantly</span>
@@ -61,9 +49,6 @@
         <span data-views="home work">a Work in Progress</span>
       </span>
 
-      <!-- Mobile: qui "a Work in Progress" segue la parola e cambia posizione,
-           quindi cambia la riga intera (fade fuori, fade dentro).
-           Se cambi il testo della scritta, cambialo anche nel blocco sopra. -->
       <span class="tagline-mobile">
         <span data-views="home">Constantly a Work in Progress</span>
         <span data-views="work">Still a Work in Progress</span>
